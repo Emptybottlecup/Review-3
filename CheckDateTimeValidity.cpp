@@ -81,8 +81,6 @@ vector<Error> CheckDateTimeError(const DateTime& dt) {
 void CheckDateTimeValidity(const DateTime& dt) {
     auto errors = CheckDateTimeError(dt);
     if (!errors.empty()) {
-        for (const auto& error : errors) {
-            throw domain_error(message[static_cast<size_t>(errors.front())]);
-        }
+        throw domain_error(message[static_cast<size_t>(errors.front())]);
     }
 }
