@@ -1,5 +1,4 @@
 ﻿enum class Error {
-    OK,
     YEAR_IS_TOO_SMALL,
     YEAR_IS_TOO_BIG,
     MONTH_IS_TOO_SMALL,
@@ -83,7 +82,7 @@ void CheckDateTimeValidity(const DateTime& dt) {
     auto errors = CheckDateTimeError(dt);
     if (!errors.empty()) {
         for (const auto& error : errors) {
-            throw domain_error(message.at(error));
+            throw domain_error(message[static_cast<size_t>(errors.front())]);
         }
     }
 }
