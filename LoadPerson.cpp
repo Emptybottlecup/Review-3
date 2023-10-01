@@ -8,7 +8,7 @@
         return *this;
     }
 
-    PersonParametrs& SetMaxnAge(int max_age) {
+    PersonParametrs& SetMaxAge(int max_age) {
         this->max_age_ = max_age;
         return *this;
     }
@@ -20,45 +20,50 @@
 };
 
 struct DbParametrs {
-    string_view db_name_;
-    int db_connection_timeout_;
-    bool db_allow_exceptions_;
-    DBLogLevel db_log_level_;
+    string_view name_;
+    int connection_timeout_;
+    bool allow_exceptions_;
+    DBLogLevel log_level_;
 
-    DbParametrs& SetDbName(string_view db_name) {
-        this->db_name_ = db_name;
+    DbParametrs& SetName(string_view name) {
+        this-> name_ = name;
         return *this;
     }
 
-    DbParametrs& SetDbTimeout (int db_connection_timeout) {
-        this->db_connection_timeout_ = db_connection_timeout;
+    DbParametrs& SetTimeout (int connection_timeout) {
+        this->connection_timeout_ = connection_timeout;
         return *this;
     }
 
-    DbParametrs& SetDbExceptions(bool db_allow_exceptions) {
-        this->db_allow_exceptions_ = db_allow_exceptions;
+    DbParametrs& SetExceptions(bool allow_exceptions) {
+        this->allow_exceptions_ = allow_exceptions;
         return *this;
     }
 
-    DbParametrs& SetDbExceptions(DBLogLevel db_log_level) {
-        this->db_log_level_ = db_log_level;
+    DbParametrs& SetLogLevel(DBLogLevel log_level) {
+        this->log_level_ = log_level;
         return *this;
     }
 };
 
-vector<Person> LoadPersons(DbParametrs db_param, PersonParametrs person_param) {
+void DbConnection(DBHandler& db, DbParametrs& db_param) {
+    DBConnector connector(db_param.allow_exceptions_, db_param.log_level_);
 
-    DBConnector connector(db_param.db_allow_exceptions_, db_param.db_log_level_);
+    if ((db_param.name_).starts_with("tmp."s)) {
+        db = connector.ConnectTmp(db_param.name_, db_param.connection_timeout_);
+    }
+    else {
+        db = connector.Connect(db_param.name_, db_param.connection_timeout_);
+    }
+}
+
+vector<Person> LoadPersons(DbParametrs db_param, PersonParametrs person_param) {
 
     DBHandler db;
 
-    if ((db_param.db_name_).starts_with("tmp."s)) {
-        db = connector.ConnectTmp(db_param.db_name_, db_param.db_connection_timeout_);
-    }
-    else {
-        db = connector.Connect(db_param.db_name_, db_param.db_connection_timeout_);
-    }
-    if (!db_param.db_allow_exceptions_ && !db.IsOK()) {
+    DbConnection(db, db_param);
+    
+    if (!db_param.allow_exceptions_ && !db.IsOK()) {
         return {};
     }
 
